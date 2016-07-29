@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<index version="1" name="mrlimbic scripts" commit="44f16ce9f576d4e22bd5b32ba05f5108ca0ed886">
+  <category name="Regions">
+    <reapack name="mrlimbic_create regions from item groups.lua" type="script">
+      <version name="1.0" author="John Baker (aka vordio aka mrlimbic)" time="2016-07-29T22:10:17Z">
+        <changelog><![CDATA[+ Initial Release]]></changelog>
+        <source main="true">https://github.com/mrlimbic/reascripts/raw/44f16ce9f576d4e22bd5b32ba05f5108ca0ed886/Regions/mrlimbic_create%20regions%20from%20item%20groups.lua</source>
+      </version>
+    </reapack>
+  </category>
+</index>
