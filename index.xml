@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="mrlimbic scripts" commit="44f16ce9f576d4e22bd5b32ba05f5108ca0ed886">
+<index version="1" name="mrlimbic scripts" commit="8748bcd3a5d8a74ad65aa36fc25f7c8f1c64559e">
+  <category name="JSFX">
+    <reapack name="Dopp Wobbler.jsfx" type="effect">
+      <version name="1.0" author="John Baker (aka mrlimbic aka vordio)" time="2016-07-30T11:48:53Z">
+        <changelog><![CDATA[+ Initial Release]]></changelog>
+        <source main="true">https://github.com/mrlimbic/reascripts/raw/8748bcd3a5d8a74ad65aa36fc25f7c8f1c64559e/JSFX/Dopp%20Wobbler.jsfx</source>
+      </version>
+    </reapack>
+  </category>
   <category name="Regions">
     <reapack name="mrlimbic_create regions from item groups.lua" type="script">
       <version name="1.0" author="John Baker (aka vordio aka mrlimbic)" time="2016-07-29T22:10:17Z">
