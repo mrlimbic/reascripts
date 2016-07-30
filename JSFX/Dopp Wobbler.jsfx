@@ -1,0 +1,133 @@
+/**
+ * JSFX Name: mrlimbic_Dopp Wobbler
+ * About: Doppler shifts to harmonics
+ * Author: John Baker (aka mrlimbic aka vordio)
+ * Licence: GPL v3
+ * REAPER: 5.0
+ * Version: 1.0
+ */
+
+/**
+ * Changelog:
+ * v1.0 (2016-07-17)
+  + Initial Release
+ */
+
+desc: Dopp Wobbler
+
+slider1:.15<.010,10,.001>Wobble Wave Length
+slider2:.05<0, 1,.001>Wobble Pitch Amount
+slider3:0<0,3,1{Pure Sine,1st/3rd Harmonic,1st/3rd/5th Harmonic,1st/3rd/5th/7th Harmonic}>Wobble Type
+slider4:0<0,1,1{None, Average}>Smoothing
+
+@init
+// We rely on slider to reinitialise
+
+@slider
+size=floor(slider1*srate); // size of the buffers required
+scheduled_time=0; // time scheduling array for both channels
+scheduled_spl0=size; // sample value array channel 1
+scheduled_spl1=size * 2; //sample value array channel 2
+wobble_amount=slider2; // wobble amount (amplitude)
+wobble_type=slider3; // Wobble wave type
+smoothing_type=slider4;
+pdc_delay=size; // delay compensation
+pdc_bot_ch=0; pdc_top_ch=2; // both channels are delayed
+store_offset=0; // buffer storage offset
+play_offset=0; // buffer playback offset
+current_time=0; // time since last reset
+last_time=0; // last time for interpolation
+last_spl0=0; // last value for interpolation channel 1
+last_spl1=0; // last value for interpolation channel 2
+
+@block
+// No special block ops
+
+@sample
+// TODO: Allow more waveform types than sine
+// (BUT ALL MUST have equal area above and below line for buffer to cycle properly)
+// where in wobble wave is current offset?
+radians = store_offset / size * 2 * $pi;
+
+// Basic sine
+wobble_type == 0 ? (
+  wobble_wave = sin(radians);
+);
+
+// Squarish waves using harmonics
+wobble_type == 1 ? (
+  wobble_wave = sin(radians) + sin(3*radians)/3;
+);
+
+wobble_type == 2 ? (
+  wobble_wave = sin(radians) + sin(3*radians)/3 + sin(5*radians)/5;
+);
+
+wobble_type == 3 ? (
+  wobble_wave = sin(radians) + sin(3*radians)/3 + sin(5*radians)/5 + sin(7*radians)/7;
+);
+
+// Apply amplitude
+wobble_wave *= wobble_amount;
+
+// how far do we have to shift incoming sample in time?
+// For now max shift is 1/4 the wobble wave length or pi/4 radians
+wobble_shift = wobble_wave * size / 4; // we may want to make this adjustable?
+
+// Schedule incoming sample to be played later
+play_time=current_time + wobble_shift + (size / 2);
+scheduled_time[store_offset]=play_time;
+scheduled_spl0[store_offset]=spl0;
+scheduled_spl1[store_offset]=spl1;
+
+store_offset += 1;
+store_offset >= size ? store_offset = 0;
+
+// Search for next scheduled sample or keep playing current one 
+// TODO: Interpolation of surrounding samples for smoother signal
+// TODO: Allow timing specified in beats instead of seconds
+// TODO: Allow amount specified in semitones instead of linear
+count = 0;
+
+// we need a buffer full before can play anything scheduled
+current_time >= size ? (
+  found=0;
+  total_spl0=0;  
+  total_spl1=0;
+  
+  while ( 
+    total_spl0 += scheduled_spl0[play_offset];
+    total_spl1 += scheduled_spl1[play_offset];
+    scheduled_time[play_offset] >= current_time ? ( 
+      found = 1;
+      
+    ) : (
+      play_offset += 1;
+      play_offset >= size ? play_offset = 0;
+    ); 
+    
+    count += 1;
+   
+    (found == 0) && (count < size);
+  );
+  
+  // Play the current or newly found sample
+  smoothing_type == 1 ? (
+    // Average
+    spl0 = total_spl0 / count;
+    spl1 = total_spl1 / count;
+  ) : (
+    // No smoothing (First found)
+    spl0 = scheduled_spl0[play_offset];
+    spl1 = scheduled_spl1[play_offset];
+  );
+  
+  // used for interpolation
+  last_spl0=spl0;
+  last_spl1=spl1;
+  last_time=scheduled_time[playoffset];
+);
+
+
+// and times goes on..
+current_time+=1; 
