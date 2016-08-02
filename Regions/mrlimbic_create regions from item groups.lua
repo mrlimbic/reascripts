@@ -13,11 +13,13 @@
  * Forum Thread URI: http://forum.cockos.com/showthread.php?p=1712482
  * REAPER: 5.0
  * Extensions: None
- * Version: 1.0
+ * Version: 1.1
 --]]
  
 --[[
  * Changelog:
+ * v1.1 (2016-07-28)
+   + Fixed bug where items sometimes moved to wrong track
  * v1.0 (2016-07-28)
   + Initial Release
 --]]
@@ -72,26 +74,34 @@ function main()
     
     moveCount = reaper.CountSelectedMediaItems(0)  
     
+    -- select all tracks 40296
+    reaper.Main_OnCommand(40296, 0)     
+    
+    -- create time selection from selected items 40290
+    reaper.Main_OnCommand(40290, 0)
+    
      -- go to end of project (move cursor to clean space)
     reaper.Main_OnCommand(reaper.NamedCommandLookup("_SWS_PROJEND"), 0)
-        
-    -- cut selected items from original position 40699
-    reaper.Main_OnCommand(40699, 0)
-  
-    -- paste items to new cursor position 40058
-    reaper.Main_OnCommand(40058, 0)
-  
-    -- create region for selected grouped items 40348 
+            
+    -- arm envelopes for selected tracks _S&M_ARMALLENVS
+    reaper.Main_OnCommand(reaper.NamedCommandLookup("_S&M_ARMALLENVS"), 0)
+    
+    -- x-raym's script to copy/paste automation in time selection to cursor _RSf39cd36f9ff163cdd1358eea07010d29bc7e27e2
+    reaper.Main_OnCommand(reaper.NamedCommandLookup("_RSf39cd36f9ff163cdd1358eea07010d29bc7e27e2"), 0)
+ 
+    -- Move items to edit cursor, don't cut/paste as they must stay on same tracks _FNG_MOVE_TO_EDIT
+    reaper.Main_OnCommand(reaper.NamedCommandLookup("_FNG_MOVE_TO_EDIT"), 0)  
+          
+    -- create region for selected (grouped) items 40348 
     reaper.Main_OnCommand(40348, 0)
    
     -- TODO really we need to rename region based on first selected item here
+    -- Better would be name it from something relevant in the item notes
    
-    -- TODO Also need to copy automation from original location to the region
-    
     -- remember how many items we are moving
     itemCount = itemCount - moveCount
     
-  --  response = reaper.ShowMessageBox("Moved " .. moveCount .. " items. " .. itemCount .. " to go.", "Progress", 1)
+    --response = reaper.ShowMessageBox("Moved " .. moveCount .. " items. " .. itemCount .. " to go.", "Progress", 1)
       
     if moveCount == 0 then
       -- if couldn't move anything then best give up
@@ -100,11 +110,6 @@ function main()
     end
     
   until itemCount <= 0
-  
-  -- TODO Would be nice if move to begining of new regions
-  
-  -- go to start of new regions 41173
-  -- reaper.Main_OnCommand(41173, 0)
   
 end
 
