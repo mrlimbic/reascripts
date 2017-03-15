@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="mrlimbic scripts" commit="8748bcd3a5d8a74ad65aa36fc25f7c8f1c64559e">
+<index version="1" name="mrlimbic scripts" commit="2a4192934058a05446f172f08fd71712eb28fb78">
   <category name="JSFX">
     <reapack name="Dopp Wobbler.jsfx" type="effect">
       <version name="1.0" author="John Baker (aka mrlimbic aka vordio)" time="2016-07-30T11:48:53Z">
@@ -13,6 +13,10 @@
       <version name="1.0" author="John Baker (aka vordio aka mrlimbic)" time="2016-07-29T22:10:17Z">
         <changelog><![CDATA[+ Initial Release]]></changelog>
         <source main="true">https://github.com/mrlimbic/reascripts/raw/44f16ce9f576d4e22bd5b32ba05f5108ca0ed886/Regions/mrlimbic_create%20regions%20from%20item%20groups.lua</source>
+      </version>
+      <version name="1.1" author="John Baker (aka vordio aka mrlimbic)" time="2016-08-02T20:03:52Z">
+        <changelog><![CDATA[+ Fixed bug where items sometimes moved to wrong track]]></changelog>
+        <source main="true">https://github.com/mrlimbic/reascripts/raw/2a4192934058a05446f172f08fd71712eb28fb78/Regions/mrlimbic_create%20regions%20from%20item%20groups.lua</source>
       </version>
     </reapack>
   </category>
