@@ -1,0 +1,110 @@
+/**
+ * JSFX Name: mrlimbic_4-ch 4-band splitter
+ * About: Loser's stereo 4-band splitter adapted to 4 channels for ambisonics
+ * Author: John Baker (aka mrlimbic aka vordio)
+ * Licence: GPL v3
+ * REAPER: 5.0
+ * Version: 1.0
+ */
+
+ // (C) 2006, Michael Gruhn.
+
+// NO WARRANTY IS GRANTED. THIS PLUG-IN IS PROVIDED ON AN "AS IS" BASIS, WITHOUT
+// WARRANTY OF ANY KIND. NO LIABILITY IS GRANTED, INCLUDING, BUT NOT LIMITED TO,
+// ANY DIRECT OR INDIRECT,  SPECIAL,  INCIDENTAL OR CONSEQUENTIAL DAMAGE ARISING
+// OUT OF  THE  USE  OR INABILITY  TO  USE  THIS PLUG-IN,  COMPUTER FAILTURE  OF
+// MALFUNCTION INCLUDED.  THE USE OF THE SOURCE CODE,  EITHER  PARTIALLY  OR  IN
+// TOTAL, IS ONLY GRANTED,  IF USED IN THE SENSE OF THE AUTHOR'S INTENTION,  AND
+// USED WITH ACKNOWLEDGEMENT OF THE AUTHOR. FURTHERMORE IS THIS PLUG-IN A  THIRD
+// PARTY CONTRIBUTION,  EVEN IF INCLUDED IN REAPER(TM),  COCKOS INCORPORATED  OR
+// ITS AFFILIATES HAVE NOTHING TO DO WITH IT.  LAST BUT NOT LEAST, BY USING THIS
+// PLUG-IN YOU RELINQUISH YOUR CLAIM TO SUE IT'S AUTHOR, AS WELL AS THE CLAIM TO
+// ENTRUST SOMEBODY ELSE WITH DOING SO.
+
+desc:4-ch 4-band splitter [mrlimbic]
+//tags: processing routing
+//author: LOSER (Adapted to 4 channel for ambisonics by mrlimbic 2017)
+
+slider1:200<0,22000,1>Crossover 1 (Hz)
+slider2:2000<0,22000,1>Crossover 2 (Hz)
+slider3:5000<0,22000,1>Crossover 3 (Hz)
+
+in_pin:input 1
+in_pin:input 2
+in_pin:input 3
+in_pin:input 4
+
+out_pin:low output 1
+out_pin:low output 2
+out_pin:low output 3
+out_pin:low output 4
+out_pin:mid output 1
+out_pin:mid output 2
+out_pin:mid output 3
+out_pin:mid output 4
+out_pin:high output 1
+out_pin:high output 2
+out_pin:high output 3
+out_pin:high output 4
+out_pin:uberhigh output 1
+out_pin:uberhigh output 2
+out_pin:uberhigh output 3
+out_pin:uberhigh output 4
+
+@init
+cDenorm=10^-30;
+
+@slider
+
+freqHI = max(min(slider3,srate),slider2);
+xHI = exp(-2.0*$pi*freqHI/srate);
+a0HI = 1.0-xHI;
+b1HI = -xHI;
+
+freqMID = max(min(min(slider2,srate),slider3),slider1);
+xMID = exp(-2.0*$pi*freqMID/srate);
+a0MID = 1.0-xMID;
+b1MID = -xMID;
+
+freqLOW = min(min(slider1,srate),slider2);
+xLOW = exp(-2.0*$pi*freqLOW/srate);
+a0LOW = 1.0-xLOW;
+b1LOW = -xLOW;
+
+@sample
+
+s0 = spl0;
+s1 = spl1;
+s2 = spl2;
+s3 = spl3;
+
+low0 = (tmp1MID = a0MID*s0 - b1MID*tmp1MID + cDenorm);
+low1 = (tmp2MID = a0MID*s1 - b1MID*tmp2MID + cDenorm);
+low2 = (tmp3MID = a0MID*s2 - b1MID*tmp3MID + cDenorm);
+low3 = (tmp4MID = a0MID*s3 - b1MID*tmp4MID + cDenorm);
+
+spl0 = (tmp1LOW = a0LOW*low0 - b1LOW*tmp1LOW + cDenorm);
+spl1 = (tmp2LOW = a0LOW*low1 - b1LOW*tmp2LOW + cDenorm);
+spl2 = (tmp3LOW = a0LOW*low2 - b1LOW*tmp3LOW + cDenorm);
+spl3 = (tmp4LOW = a0LOW*low3 - b1LOW*tmp4LOW + cDenorm);
+
+spl4 = low0 - spl0;
+spl5 = low1 - spl1;
+spl6 = low2 - spl2;
+spl7 = low3 - spl3;
+
+hi0 = s0 - low0;
+hi1 = s1 - low1;
+hi2 = s2 - low2;
+hi3 = s3 - low3;
+
+spl8 = (tmp1HI = a0HI*hi0 - b1HI*tmp1HI + cDenorm);
+spl9 = (tmp2HI = a0HI*hi1 - b1HI*tmp2HI + cDenorm);
+spl10 = (tmp3HI = a0HI*hi2 - b1HI*tmp3HI + cDenorm);
+spl11 = (tmp4HI = a0HI*hi3 - b1HI*tmp4HI + cDenorm);
+
+spl12 = hi0 - spl8;
+spl13 = hi1 - spl9;
+spl14 = hi2 - spl10;
+spl15 = hi3 - spl11;
+

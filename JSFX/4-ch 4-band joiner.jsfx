@@ -1,0 +1,86 @@
+/**
+ * JSFX Name: mrlimbic_4-ch 4-band joiner
+ * About: Loser's stereo 4-band joiner adapted to 4 channels for ambisonics
+ * Author: John Baker (aka mrlimbic aka vordio)
+ * Licence: GPL v3
+ * REAPER: 5.0
+ * Version: 1.0
+ */
+
+ // (C) 2006, Michael Gruhn.
+
+// NO WARRANTY IS GRANTED. THIS PLUG-IN IS PROVIDED ON AN "AS IS" BASIS, WITHOUT
+// WARRANTY OF ANY KIND. NO LIABILITY IS GRANTED, INCLUDING, BUT NOT LIMITED TO,
+// ANY DIRECT OR INDIRECT,  SPECIAL,  INCIDENTAL OR CONSEQUENTIAL DAMAGE ARISING
+// OUT OF  THE  USE  OR INABILITY  TO  USE  THIS PLUG-IN,  COMPUTER FAILTURE  OF
+// MALFUNCTION INCLUDED.  THE USE OF THE SOURCE CODE,  EITHER  PARTIALLY  OR  IN
+// TOTAL, IS ONLY GRANTED,  IF USED IN THE SENSE OF THE AUTHOR'S INTENTION,  AND
+// USED WITH ACKNOWLEDGEMENT OF THE AUTHOR. FURTHERMORE IS THIS PLUG-IN A  THIRD
+// PARTY CONTRIBUTION,  EVEN IF INCLUDED IN REAPER(TM),  COCKOS INCORPORATED  OR
+// ITS AFFILIATES HAVE NOTHING TO DO WITH IT.  LAST BUT NOT LEAST, BY USING THIS
+// PLUG-IN YOU RELINQUISH YOUR CLAIM TO SUE IT'S AUTHOR, AS WELL AS THE CLAIM TO
+// ENTRUST SOMEBODY ELSE WITH DOING SO.
+
+desc:4-ch 4-band joiner [mrlimbic]
+
+//tags: processing routing
+//author: LOSER (Adapted to 4 channel for ambisonics by mrlimbic 2017)
+
+slider1:0<-24,24,.1>Low (dB)
+slider2:0<-24,24,.1>Mid (dB)
+slider3:0<-24,24,.1>High (dB)
+slider4:0<-24,24,.1>UberHigh (dB)
+
+in_pin:low input 1
+in_pin:low input 2
+in_pin:low input 3
+in_pin:low input 4
+in_pin:mid input 1
+in_pin:mid input 2
+in_pin:mid input 3
+in_pin:mid input 4
+in_pin:high input 1
+in_pin:high input 2
+in_pin:high input 3
+in_pin:high input 4
+in_pin:uberhigh input 1
+in_pin:uberhigh input 2
+in_pin:uberhigh input 3
+in_pin:uberhigh input 4
+
+out_pin:output 1
+out_pin:output 2
+out_pin:output 3
+out_pin:output 4
+
+@init
+c_ampdB = 8.65617025;
+
+@slider
+band1 = exp(slider1/c_ampdB);
+band2 = exp(slider2/c_ampdB);
+band3 = exp(slider3/c_ampdB);
+band4 = exp(slider4/c_ampdB);
+
+@sample
+spl0 = spl0 * band1 + spl4 * band2 + spl8 * band3 + spl12 * band4;
+spl1 = spl1 * band1 + spl5 * band2 + spl9 * band3 + spl13 * band4;
+spl2 = spl2 * band1 + spl6 * band2 + spl10 * band3 + spl14 * band4;
+spl3 = spl3 * band1 + spl7 * band2 + spl11 * band3 + spl15 * band4;
+
+// zero out other channelsor or else they will pass through
+// but are useless anyway as the first band is lost
+spl4 = 0;
+spl5 = 0;
+spl6 = 0;
+spl7 = 0;
+spl8 = 0;
+spl8 = 0;
+spl9 = 0;
+spl10 = 0;
+spl11 = 0;
+spl12 = 0;
+spl13 = 0;
+spl14 = 0;
+spl15 = 0;
+
