@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="mrlimbic scripts" commit="3129d5e358f892f293884614283984967d4e75b8">
+<index version="1" name="mrlimbic scripts" commit="83e519639a31ce8f1cab41862b97300b9f4b9404">
   <category name="Envelopes">
     <reapack name="mrlimbic_merge_track_volume_envelope_into_selected_items.lua" type="script" desc="Merge track volume automation into selected items">
       <version name="1.0" author="John Baker (aka vordio aka mrlimbic)" time="2017-03-15T13:09:07Z">
@@ -69,6 +69,21 @@
       <version name="1.0" author="John Baker (aka mrlimbic aka vordio)" time="2016-07-30T11:48:53Z">
         <changelog><![CDATA[+ Initial Release]]></changelog>
         <source main="true">https://github.com/mrlimbic/reascripts/raw/8748bcd3a5d8a74ad65aa36fc25f7c8f1c64559e/JSFX/Dopp%20Wobbler.jsfx</source>
+      </version>
+    </reapack>
+    <reapack name="MMC locate.jsfx" type="effect" desc="MMC locate">
+      <metadata>
+        <description><![CDATA[{\rtf1\ansi\deff0{\fonttbl{\f0 \fswiss Helvetica;}{\f1 Courier;}}
+{\colortbl;\red255\green0\blue0;\red0\green0\blue255;}
+\widowctrl\hyphauto
+
+{\pard \ql \f0 \sa180 \li0 \fi0 Sends an MMC locate midi message when project is in stopped state but the cursor is moved. This plugin only works as expected when using play/stop. Pause is broken due to an API limitation.\par}
+}
+]]></description>
+      </metadata>
+      <version name="1.0" author="mrlimbic" time="2018-01-09T21:17:54Z">
+        <changelog><![CDATA[Initial release]]></changelog>
+        <source>https://github.com/mrlimbic/reascripts/raw/83e519639a31ce8f1cab41862b97300b9f4b9404/JSFX/MMC%20locate.jsfx</source>
       </version>
     </reapack>
   </category>
