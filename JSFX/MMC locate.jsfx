@@ -1,0 +1,116 @@
+desc: MMC locate
+author: mrlimbic
+version: 1.0
+changelog: Initial release
+about: 
+  Sends an MMC locate midi message when project is in stopped state but the cursor is moved.
+  This plugin only works as expected when using play/stop. Pause is broken due to an API
+  limitation.
+VendorString: mrlimbic
+
+// Note that 29.97DF is unsupported at the moment so broken in practice
+slider1:2<1,6,1{23.98,24,25,29.97DF(Unsupported),29.97ND,30}>Frame Rate
+slider2:0<0,23,1>HH
+slider3:0<0,59,1>MM
+slider4:0<0,59,1>SS
+slider5:0<0,29,1>FF
+
+@init
+
+function toFrames(p) (
+  // take offset into account  
+  floor((p + offset) * fr_den / fr_num + 0.001); // 1ms to avoid rounding error
+);
+
+
+buf = 0;
+state = play_state;
+pos = play_position;
+
+// Hours and Type : 0yyzzzzz
+// yy = Type: 00 = 24 fps, 01 = 25 fps, 10 = 30 fps (drop frame), 11 = 30 fps (non-drop frame)
+// zzzzz = Hours (0-23)
+//0 = 24 Frames/Second
+//1 = 25 Frames/Second
+//2 = 30 Frames/Second (Drop-Frame)
+//3 = 30 Frames/Second (Non-Drop)
+
+function locate(f) (
+  // We've rounded frames so we need to calculate rest from that too
+  fr_pos = f * fr_num / fr_den; 
+  ff = f % fr_base;
+  ss = fr_pos % 60;
+  mm = (fr_pos / 60) % 60;
+  hh = ((fr_pos / 3600) % 24) + (fr_type << 5); // we encode frame rate in hours as bit shift
+  
+  // Build a MMC locate sysex message
+  buf[0] = 0xF0;
+  buf[1] = 0x7f;
+  buf[2] = 0x7f; // Device ID 127 for all devices - make this an option in future?
+  buf[3] = 0x06;
+  buf[4] = 0x44;
+  buf[5] = 0x06;
+  buf[6] = 0x01;
+  buf[7] = hh;
+  buf[8] = mm;
+  buf[9] = ss;
+  buf[10] = ff;
+  buf[11] = 0x00; // partial frames but is sys dependent so just use 0
+  buf[12] = 0xf7;
+  
+  midisend_buf(0, buf, 13); // 13 byte sysex message
+);
+
+@slider
+// set up frame duration as numerator/denominator rational value
+fr=slider1;
+
+fr == 1 || fr == 2 ? fr_base = 24;
+fr == 3 ? fr_base = 25;
+fr == 4 | fr == 5 | fr == 6 ? fr_base = 30;
+fr == 1 | fr == 4 | fr == 5 ? fr_num = 1001 : fr_num = 1000;
+fr == 1 || fr == 2 ? fr_type = 0x00; // 23.98 is probably incorrect? 0 = 24fps
+fr == 3 ? fr_type = 0x01;
+fr == 4 ? fr_type = 0x02;
+fr == 5 ? fr_type = 0x03;
+fr == 6 ? fr_type = 0x03;
+fr_den = fr_base * 1000;
+
+// recalculate anything dependent on parameters
+hh = slider2;
+mm = slider3;
+ss = slider4;
+ff = slider5;
+  
+// calculate offset and current frames location
+offset = hh * 3600 + mm * 60 + ss + (ff * fr_num / fr_den);
+frames = toFrames(pos);
+
+@block
+// The current playback state of REAPER (0=stopped, <0=error, 1=playing, 2=paused, 5=recording, 6=record paused).
+new_state = play_state;
+new_pos = play_position;
+new_frames = toFrames(new_pos);
+
+// Are we stopped?
+state != 1 || state != 5 ? (
+    // Stopped so send locate if position moved
+    frames != new_frames ? (
+      locate(new_frames);
+    );
+ );
+
+// Update state and position
+state = new_state;
+pos = new_pos;
+frames = new_frames;
+
+@sample
+
+
+
+
+
+
+
+
