@@ -1,7 +1,9 @@
 desc: MMC locate
 author: mrlimbic
-version: 1.0
-changelog: Initial release
+version: 1.1
+changelog: 
+  Initial release
+  1.1 fixes frame rounding error
 about: 
   Sends an MMC locate midi message when project is in stopped state but the cursor is moved.
   This plugin only works as expected when using play/stop. Pause is broken due to an API
@@ -37,7 +39,7 @@ pos = play_position;
 
 function locate(f) (
   // We've rounded frames so we need to calculate rest from that too
-  fr_pos = f * fr_num / fr_den; 
+  fr_pos = f * fr_num / fr_den + 0.001; // 1ms to avoid fp rounding error 
   ff = f % fr_base;
   ss = fr_pos % 60;
   mm = (fr_pos / 60) % 60;
