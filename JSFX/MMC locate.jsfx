@@ -1,9 +1,10 @@
 desc: MMC locate
 author: mrlimbic
-version: 1.1
+version: 1.2
 changelog: 
+  1.2 Fixed frame rate drop down setting incorrect values
+  1.1 Fixed frame rounding error
   Initial release
-  1.1 fixes frame rounding error
 about: 
   Sends an MMC locate midi message when project is in stopped state but the cursor is moved.
   This plugin only works as expected when using play/stop. Pause is broken due to an API
@@ -11,7 +12,7 @@ about:
 VendorString: mrlimbic
 
 // Note that 29.97DF is unsupported at the moment so broken in practice
-slider1:2<1,6,1{23.98,24,25,29.97DF(Unsupported),29.97ND,30}>Frame Rate
+slider1:2<0,5,1{23.98,24,25,29.97DF(Unsupported),29.97ND,30}>Frame Rate
 slider2:0<0,23,1>HH
 slider3:0<0,59,1>MM
 slider4:0<0,59,1>SS
@@ -67,15 +68,15 @@ function locate(f) (
 // set up frame duration as numerator/denominator rational value
 fr=slider1;
 
-fr == 1 || fr == 2 ? fr_base = 24;
-fr == 3 ? fr_base = 25;
-fr == 4 | fr == 5 | fr == 6 ? fr_base = 30;
-fr == 1 | fr == 4 | fr == 5 ? fr_num = 1001 : fr_num = 1000;
-fr == 1 || fr == 2 ? fr_type = 0x00; // 23.98 is probably incorrect? 0 = 24fps
-fr == 3 ? fr_type = 0x01;
-fr == 4 ? fr_type = 0x02;
+fr == 0 || fr == 1 ? fr_base = 24;
+fr == 2 ? fr_base = 25;
+fr == 3 || fr == 4 || fr == 5 ? fr_base = 30;
+fr == 0 || fr == 3 || fr == 4 ? fr_num = 1001 : fr_num = 1000;
+fr == 0 || fr == 1 ? fr_type = 0x00; // 23.98 is probably incorrect? 0 = 24fps
+fr == 2 ? fr_type = 0x01;
+fr == 3 ? fr_type = 0x02;
+fr == 4 ? fr_type = 0x03;
 fr == 5 ? fr_type = 0x03;
-fr == 6 ? fr_type = 0x03;
 fr_den = fr_base * 1000;
 
 // recalculate anything dependent on parameters
@@ -108,11 +109,3 @@ pos = new_pos;
 frames = new_frames;
 
 @sample
-
-
-
-
-
-
-
-
