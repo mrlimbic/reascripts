@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="mrlimbic scripts" commit="ad590a46743c39f1b9ca3a7a4e2f3e740cd7d633">
+<index version="1" name="mrlimbic scripts" commit="3fb29fa4232a7176304f97201288b43b450ef5ca">
   <category name="Envelopes">
     <reapack name="mrlimbic_merge_track_volume_envelope_into_selected_items.lua" type="script" desc="Merge track volume automation into selected items">
       <version name="1.0" author="John Baker (aka vordio aka mrlimbic)" time="2017-03-15T13:09:07Z">
@@ -95,6 +95,13 @@
 1.1 Fixed frame rounding error
 Initial release]]></changelog>
         <source>https://github.com/mrlimbic/reascripts/raw/ad590a46743c39f1b9ca3a7a4e2f3e740cd7d633/JSFX/MMC%20locate.jsfx</source>
+      </version>
+      <version name="1.3" author="mrlimbic" time="2018-01-10T19:08:00Z">
+        <changelog><![CDATA[1.3 Fixed issue of sending MMC when it shouldn't
+1.2 Fixed frame rate drop down setting incorrect values
+1.1 Fixed frame rounding error
+Initial release]]></changelog>
+        <source>https://github.com/mrlimbic/reascripts/raw/3fb29fa4232a7176304f97201288b43b450ef5ca/JSFX/MMC%20locate.jsfx</source>
       </version>
     </reapack>
   </category>
