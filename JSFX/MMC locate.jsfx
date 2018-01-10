@@ -1,7 +1,8 @@
 desc: MMC locate
 author: mrlimbic
-version: 1.2
+version: 1.3
 changelog: 
+  1.3 Fixed issue of sending MMC when it shouldn't
   1.2 Fixed frame rate drop down setting incorrect values
   1.1 Fixed frame rounding error
   Initial release
@@ -96,7 +97,7 @@ new_pos = play_position;
 new_frames = toFrames(new_pos);
 
 // Are we stopped?
-state != 1 || state != 5 ? (
+new_state != 1 && new_state != 5 ? (
     // Stopped so send locate if position moved
     frames != new_frames ? (
       locate(new_frames);
