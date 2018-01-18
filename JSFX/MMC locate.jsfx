@@ -1,7 +1,8 @@
 desc: MMC locate
 author: mrlimbic
-version: 1.3
+version: 1.4
 changelog: 
+  1.4 Added mode so can send as MMC locate or MTC fullframe
   1.3 Fixed issue of sending MMC when it shouldn't
   1.2 Fixed frame rate drop down setting incorrect values
   1.1 Fixed frame rounding error
@@ -14,10 +15,11 @@ VendorString: mrlimbic
 
 // Note that 29.97DF is unsupported at the moment so broken in practice
 slider1:2<0,5,1{23.98,24,25,29.97DF(Unsupported),29.97ND,30}>Frame Rate
-slider2:0<0,23,1>HH
-slider3:0<0,59,1>MM
-slider4:0<0,59,1>SS
-slider5:0<0,29,1>FF
+slider2:0<0,1,1{MMC locate,MTC fullframe}>Mode
+slider3:0<0,23,1>HH
+slider4:0<0,59,1>MM
+slider5:0<0,59,1>SS
+slider6:0<0,29,1>FF
 
 @init
 
@@ -47,27 +49,45 @@ function locate(f) (
   mm = (fr_pos / 60) % 60;
   hh = ((fr_pos / 3600) % 24) + (fr_type << 5); // we encode frame rate in hours as bit shift
   
-  // Build a MMC locate sysex message
-  buf[0] = 0xF0;
-  buf[1] = 0x7f;
-  buf[2] = 0x7f; // Device ID 127 for all devices - make this an option in future?
-  buf[3] = 0x06;
-  buf[4] = 0x44;
-  buf[5] = 0x06;
-  buf[6] = 0x01;
-  buf[7] = hh;
-  buf[8] = mm;
-  buf[9] = ss;
-  buf[10] = ff;
-  buf[11] = 0x00; // partial frames but is sys dependent so just use 0
-  buf[12] = 0xf7;
+  mode == 0 ? (
+    // Send a MMC locate sysex message 
+    buf[0] = 0xF0;
+    buf[1] = 0x7f;
+    buf[2] = 0x7f; // Device ID 127 for all devices - make this an option in future?
+    buf[3] = 0x06;
+    buf[4] = 0x44;
+    buf[5] = 0x06;
+    buf[6] = 0x01;
+    buf[7] = hh;
+    buf[8] = mm;
+    buf[9] = ss;
+    buf[10] = ff;
+    buf[11] = 0x00; // partial frames but is sys dependent so just use 0
+    buf[12] = 0xf7;
+    
+    midisend_buf(0, buf, 13); // 13 byte sysex message
+  ) : (
+    // Send an MTC fullframe sysex message F0 7F cc 01 01 hr mn sc fr F7
+    buf[0] = 0xF0;
+    buf[1] = 0x7f;
+    buf[2] = 0x7f; // Device ID 127 for all devices - make this an option in future?
+    buf[3] = 0x01;
+    buf[4] = 0x01;
+    buf[5] = hh;
+    buf[6] = mm;
+    buf[7] = ss;
+    buf[8] = ff;
+    buf[9] = 0xf7;
+   
+    midisend_buf(0, buf, 10); // 10 byte sysex message
+  );
   
-  midisend_buf(0, buf, 13); // 13 byte sysex message
 );
 
 @slider
 // set up frame duration as numerator/denominator rational value
 fr=slider1;
+mode = slider2;
 
 fr == 0 || fr == 1 ? fr_base = 24;
 fr == 2 ? fr_base = 25;
@@ -81,10 +101,10 @@ fr == 5 ? fr_type = 0x03;
 fr_den = fr_base * 1000;
 
 // recalculate anything dependent on parameters
-hh = slider2;
-mm = slider3;
-ss = slider4;
-ff = slider5;
+hh = slider3;
+mm = slider4;
+ss = slider5;
+ff = slider6;
   
 // calculate offset and current frames location
 offset = hh * 3600 + mm * 60 + ss + (ff * fr_num / fr_den);
