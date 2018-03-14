@@ -1,5 +1,4 @@
--- FILE ANALYSIS ------------------------------------------
--- co-made with mrlimbic from Vordio
+-- Library co-written by X-RayM & mrlimbic (aka Vordio)
 
 RIFFMetaData_SUPPORTED = { "iXML", "bext", "cue ", "_PMX", "LIST", "INFO" }
 
