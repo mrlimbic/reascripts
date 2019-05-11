@@ -118,18 +118,16 @@ function scenedetect(item, take, source, track)
     escape(executable) .. 
     string.format(arguments, file, tempFile, tempFile, finalFile)
 
-  msg(command)
-  master_command = command
   if windows then
+    master_command = command
     master_command = 'cmd.exe /C "' .. command .. '"'
+    msg(master_command)
+    local retval = reaper.ExecProcess( master_command, 0 )
   else
-    master_command = '/bin/sh -c "' .. command .. '"'
+    -- mac/linux
+    msg(command)
+    os.execute(command)
   end
-  
-  --Msg2( take_name )
-  msg( "\n" .. master_command .. "\n" )
-
-  local retval = reaper.ExecProcess( master_command, 0 )
 end
 
 -- called when there is csv to process
