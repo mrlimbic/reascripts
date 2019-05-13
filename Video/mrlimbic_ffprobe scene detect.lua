@@ -13,11 +13,12 @@
  * Forum Thread URI:
  * REAPER: 5.0
  * Extensions: None
- * Version: 1.1
+ * Version: 1.2
 --]]
  
 --[[
  * Changelog:
+ * v1.2 Fixed bugs and added progress indicator
 --]]
 
 --[[
@@ -37,10 +38,12 @@ for you to find it in your preferred location
 
 --]]
 
-debug = false
+debug = true
+showprogress = true
 
 suffix = '-Scenes.txt'
 expecting = {} -- files we are expecting to be created
+processing = {} -- files that we are currently processing
 windows = string.find(reaper.GetOS(), "Win") ~= nil
 separator = windows and '\\' or '/'
 
@@ -60,6 +63,12 @@ function msg(text)
   if debug then
     reaper.ShowConsoleMsg(text .. '\n')
   end
+end
+
+function CloseConsole()
+--  local title = reaper.JS_Localize('ReaScript console output', "common")
+--  local hwnd = reaper.JS_Window_Find(title, true)
+--  if hwnd then reaper.JS_Window_Destroy(hwnd) end  
 end
 
 -- parses ffprobe output line which has format k=v|k=v|k=v etc
@@ -100,6 +109,9 @@ function scenedetect(item, take, source, track)
   table.insert(expecting, {
     item=item, take=take, source=source, csv=csv, name=name, track=track
   })
+  
+  -- don't process same file twice
+  if processing[csv] ~= nil then return end
 
 -- ffprobe -show_frames -of compact=p=0 -f lavfi 'movie=MyMovie.MP4,select=gt(scene\,.4)' > times.temp && mv times.tmp times.txt & 
 
@@ -128,41 +140,61 @@ function scenedetect(item, take, source, track)
     msg(command)
     os.execute(command)
   end
+  
+  processing[csv] = true -- don't process same file twice
+end
+
+function addItem(destTrack, itemStart, itemEnd, videoStart, videoEnd, count)
+  -- Does new item overlap with the video item?
+  if itemEnd >= videoStart and itemStart < videoEnd then
+    -- cut is within video range - trim to fit
+    if itemStart < videoStart then itemStart = videoStart end
+    if itemEnd > videoEnd then itemEnd = videoEnd end
+    
+    local item = reaper.AddMediaItemToTrack(destTrack)
+    reaper.ULT_SetMediaItemNote( item, string.format("%03d", tonumber(count)))
+    reaper.SetMediaItemPosition(item, itemStart, false)
+    reaper.SetMediaItemLength(item, itemEnd - itemStart, true)
+  end
 end
 
 -- called when there is csv to process
 function processCuts(info)
   local videoItem = info["item"]
-  local videoPos = reaper.GetMediaItemInfo_Value( videoItem, "D_POSITION" )
+  local videoStart = reaper.GetMediaItemInfo_Value( videoItem, "D_POSITION" )
   local videoLength = reaper.GetMediaItemInfo_Value( videoItem, "D_LENGTH" )
+  local videoEnd = videoStart + videoLength
+  local videoTake = reaper.GetActiveTake(videoItem)
+  local videoOffset = reaper.GetMediaItemTakeInfo_Value( videoTake, "D_STARTOFFS" )
+  
   local destTrack = info["track"]
   local file = info["csv"]
   local name = info["name"]
   
   msg("Processing cuts in file " .. file)
   
-  local position = 0;
+  local position = - videoOffset; -- should this be negative video offset?
   local count = 1
   for line in io.lines(file) do 
     --msg(line)
   
     local cols = parseLine (line)
-    local cut = tonumber(cols["pkt_dts_time"])
-    local length = cut - position;
-    local item = reaper.AddMediaItemToTrack(destTrack)
-    reaper.ULT_SetMediaItemNote( item, string.format("%03d", tonumber(count)))
-    reaper.SetMediaItemPosition(item, videoPos + position, false)
-    reaper.SetMediaItemLength(item, length, true)
+    local cut = tonumber(cols["pkt_dts_time"]) - videoOffset -- need to offset this?
+    local length = cut - position
     
+    local itemStart = position + videoStart
+    local itemEnd = itemStart + length
+    
+    addItem(destTrack, itemStart, itemEnd, videoStart, videoEnd, count)
+         
     position = cut
     count = count + 1
   end
   
   -- add last item
-  local item = reaper.AddMediaItemToTrack(destTrack)
-  local length = videoLength - position;
-  reaper.SetMediaItemPosition(item, videoPos + position, false)
-  reaper.SetMediaItemLength(item, length, true)
+  local itemStart = position + videoStart
+  local itemEnd = videoEnd
+  addItem(destTrack,  itemStart, itemEnd, videoStart, videoEnd, count)
   
   msg("All cuts processed in file " .. file)
   
@@ -174,6 +206,8 @@ function processAll()
   end
 
   reaper.Undo_EndBlock('',1)
+  
+  CloseConsole()
 end
 
 -- check to see if any expected files have arrived
@@ -190,8 +224,10 @@ function checkresults()
   end
   
   if all then
-     processAll()
+    msg('\nComplete!\n')
+    processAll()
   else
+    if showprogress then reaper.ShowConsoleMsg('.') end
     reaper.defer(checkresults)
   end
 end
