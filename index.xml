@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="mrlimbic scripts" commit="e7c5facf059134fccd23d3a9aa28d11204b592aa">
+<index version="1" name="mrlimbic scripts" commit="576064ee9cdb93efc639b5036a92e86426b43b32">
   <category name="Envelopes">
     <reapack name="mrlimbic_merge_track_volume_envelope_into_selected_items.lua" type="script" desc="Merge track volume automation into selected items">
       <version name="1.0" author="John Baker (aka vordio aka mrlimbic)" time="2017-03-15T13:09:07Z">
@@ -129,6 +129,13 @@ Initial release]]></changelog>
     <reapack name="mrlimbic_add sequential mono sends to parent and disable master-parent send.lua" type="script" desc="Route sequential mono tracks to parent track">
       <version name="1.0" author="John Baker (aka vordio aka mrlimbic)" time="2019-01-14T19:25:56Z">
         <source main="main">https://github.com/mrlimbic/reascripts/raw/6d70cfd24d2aba3640775e80502d942b7de82c4f/Routing/mrlimbic_add%20sequential%20mono%20sends%20to%20parent%20and%20disable%20master-parent%20send.lua</source>
+      </version>
+    </reapack>
+  </category>
+  <category name="Timecode">
+    <reapack name="mrlimbic_timecode_entry.lua" type="script" desc="mrlimbic's timecode entry">
+      <version name="1.0" author="mrlimbic" time="2020-02-10T15:41:51Z">
+        <source main="main">https://github.com/mrlimbic/reascripts/raw/576064ee9cdb93efc639b5036a92e86426b43b32/Timecode/mrlimbic_timecode_entry.lua</source>
       </version>
     </reapack>
   </category>
