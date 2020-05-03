@@ -1,12 +1,4 @@
- desc:LCR Panner - Simple Mono [mrlimbic]
- author: mrlimbic
- version: 1.2
- changelog:
-   Initial release
- about:
-   Works as a LCR panner at front and stereo panner at Rear
-   Use front/rear to work as 5.1 panner or use rear upmix to work as LCR->5.1 upmixer
- VendorString: mrlimbic
+desc: LCR Panner - Simple Mono [mrlimbic]
 
 slider1:0<-1,1,0.01>Left/Centre/Right
 slider2:1<1,-1,0.01>Front/Rear
