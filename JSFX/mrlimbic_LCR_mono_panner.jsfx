@@ -1,4 +1,5 @@
 desc: LCR Panner - Simple Mono [mrlimbic]
+version: 1.3
 
 slider1:0<-1,1,0.01>Left/Centre/Right
 slider2:1<1,-1,0.01>Front/Rear
