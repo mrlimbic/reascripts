@@ -1,16 +1,12 @@
-/**
- * JSFX Name: LCR Panner - Simple Mono
- * About: Loser's stereo compressor adapted to 4 channels with added sidechain for ambisonics
- * Author: John Baker (aka mrlimbic aka vordio)
- * Licence: GPL v3
- * REAPER: 6.0
- * Version: 1.0
- *
- * Works as a LCR panner at front and stereo panner at Rear
- * Use front/rear to work as 5.1 panner or use rear upmix to work as LCR->5.1 upmixer
- */
-
-desc:LCR Panner - Simple Mono [mrlimbic]
+ desc:LCR Panner - Simple Mono [mrlimbic]
+ author: mrlimbic
+ version: 1.0
+ changelog:
+   Initial release
+ about:
+   Works as a LCR panner at front and stereo panner at Rear
+   Use front/rear to work as 5.1 panner or use rear upmix to work as LCR->5.1 upmixer
+ VendorString: mrlimbic
 
 slider1:0<-1,1,0.01>Left/Centre/Right
 slider2:1<1,-1,0.01>Front/Rear
