@@ -1,0 +1,87 @@
+desc:LCR Panner - Simple Mono [mrlimbic]
+tags: LCR panner
+author: John Baker (aka mrlimbic aka vordio)
+version: 1.0
+changelog:
+  initial checkin
+about:
+  Works as a LCR panner at front and stereo panner at Rear.
+  Use front/rear to work as 5.1 panner or use rear upmix to work as LCR->5.1 upmixer.
+VendorString: mrlimbic
+
+slider1:0<-1,1,0.01>Left/Centre/Right
+slider2:1<1,-1,0.01>Front/Rear
+slider3:-96<-96,0,0.1>LFE
+slider4:-96<-96,0,0.1>Rear Upmix
+
+in_pin:L
+in_pin:R
+
+out_pin:L
+out_pin:R
+out_pin:C
+out_pin:LFE
+out_pin:Ls
+out_pin:Rs
+
+// db to linear
+// db > -96.0 ? Math.pow(10.0, (0.05 * db)) : 0.0;
+
+@init
+// Globals, functions and psuedo classes
+PI = 3.141592653589793;
+SMOOTH_CHANGE = 0.0001; // gain change allowed per sample
+
+function dbToLinear(db) (
+  db > -96.0 ? pow(10.0, (0.05 * db)) : 0.0;
+);
+
+// psuedo class for simple linear easing
+// of values in range of 0..1
+// Improve this by making it non linear?
+function smooth(value) (
+  this.target = value; // aiming for this new value
+  this.current = abs(abs(this.current) - abs(this.target)) < SMOOTH_CHANGE ? this.target :
+        (this.current > this.target ? this.current - SMOOTH_CHANGE : this.current + SMOOTH_CHANGE);
+  this.current;
+);
+
+@slider
+// Precalculate target gain values (these will need damping applied to sample gain)
+pan = slider1;
+distC = abs(pan);  // distance from centre
+angleC = distC * PI / 2.0; // why is angle always zero when distance isn't?
+angleS = ((pan + 1.0) / 2.0) * PI / 2.0; // angle for side/rear speakers
+gainFR = sin((slider2 + 1.0) * PI / 4.0); // Front/rear balance (rear is 1.0 - gainFR)
+
+gainC = cos(angleC); // Gain centre
+gainS = sin(angleC); // Gain front side
+gainL = pan < 0 ? gainS : 0.0; // eliminate right channel if panner is on left side
+gainR = pan < 0 ? 0.0 : gainS; // eliminate left channel if panner is on right side
+gainLFE = dbToLinear(slider3); // Gain LFE
+gainRear = dbToLinear(slider4); // Gain side/rear upmix
+gainLs = cos(angleS) * gainRear; // Gain left side/rear
+gainRs = sin(angleS) * gainRear; // Gain right side/rear
+
+// Adjust gains based on front/rear positioning
+gainLs = gainLs + ((1.0 - gainFR) * (gainL + (gainC / 2.0)));
+gainRs = gainRs + ((1.0 - gainFR) * (gainR + (gainC / 2.0)));
+gainC *= gainFR;
+gainL *= gainFR;
+gainR *= gainFR;
+
+@sample
+
+in = (spl0 + spl1) / 2.0; // input sample value as mono
+
+// Is the slider between L/C or or C/R?
+// side gain needs to be smoothed differently
+// It clicked when shifting left to right fast because suddenly
+// other channel keeps large amount rather than travelling through 0
+
+spl0 = in * gsl.smooth(gainL);
+spl1 = in * gsr.smooth(gainR); // eliminate left channel if panner is on right side
+spl2 = in * gsc.smooth(gainC); // Centre gain
+spl3 = in * gslfe.smooth(gainLFE);
+spl4 = in * gsls.smooth(gainLs); // Rear left
+spl5 = in * gsrs.smooth(gainRs); // Rear right
