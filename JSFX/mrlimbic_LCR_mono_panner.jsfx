@@ -1,8 +1,10 @@
 desc: LCR Panner - Simple Mono [mrlimbic]
-version: 1.3
+//tags: Surround LCR pan panner 3.1 5.1
+//author: mrlimbic
+version: 1.4
 
-slider1:0<-1,1,0.01>Left/Centre/Right
-slider2:1<1,-1,0.01>Front/Rear
+slider1:0<-100,100,0.1>Left/Centre/Right
+slider2:100<-100,100,0.1>Rear/Front
 slider3:-96<-96,0,0.1>LFE
 slider4:-96<-96,0,0.1>Rear Upmix
 
@@ -27,31 +29,57 @@ SMOOTH_CHANGE = 0.0001; // gain change allowed per sample
 function dbToLinear(db) (
   db > -96.0 ? pow(10.0, (0.05 * db)) : 0.0;
 );
-
-// psuedo class for simple linear easing
-// of values in range of 0..1
-// Improve this by making it non linear?
-function smooth(value) (
-  this.target = value; // aiming for this new value
-  this.current = abs(abs(this.current) - abs(this.target)) < SMOOTH_CHANGE ? this.target :
-        (this.current > this.target ? this.current - SMOOTH_CHANGE : this.current + SMOOTH_CHANGE);
-  this.current;
+// Simple interoplator that smooths slider value across sample block
+// This should be replaced later with a sample accurate interpolator
+function interp_init(index) (
+  this.slider_index = index;
+  this.last_value = slider(this.slider_index);
 );
 
+function interp_slider() (
+  this.next_value = slider(this.slider_index);
+);
+
+function interp_block() global(samplesblock) (
+  this.delta = (this.next_value - this.last_value) / samplesblock;
+);
+
+function interp_sample() (
+  value = this.last_value;
+  this.last_value += this.delta;
+  value;
+);
+
+i1.interp_init(1);
+i2.interp_init(2);
+i3.interp_init(3);
+i4.interp_init(4);
+
 @slider
-// Precalculate target gain values (these will need damping applied to sample gain)
-pan = slider1;
+i1.interp_slider();
+i2.interp_slider();
+i3.interp_slider();
+i4.interp_slider();
+
+@block
+i1.interp_block();
+i2.interp_block();
+i3.interp_block();
+i4.interp_block();
+
+@sample
+pan = -i1.interp_sample() / 100.0;
 distC = abs(pan);  // distance from centre
 angleC = distC * PI / 2.0; // why is angle always zero when distance isn't?
 angleS = ((pan + 1.0) / 2.0) * PI / 2.0; // angle for side/rear speakers
-gainFR = sin((slider2 + 1.0) * PI / 4.0); // Front/rear balance (rear is 1.0 - gainFR)
+gainFR = sin(((i2.interp_sample() / 100.0) + 1.0) * PI / 4.0); // Front/rear balance (rear is 1.0 - gainFR)
 
 gainC = cos(angleC); // Gain centre
 gainS = sin(angleC); // Gain front side
 gainL = pan < 0 ? gainS : 0.0; // eliminate right channel if panner is on left side
 gainR = pan < 0 ? 0.0 : gainS; // eliminate left channel if panner is on right side
-gainLFE = dbToLinear(slider3); // Gain LFE
-gainRear = dbToLinear(slider4); // Gain side/rear upmix
+gainLFE = dbToLinear(i3.interp_sample()); // Gain LFE
+gainRear = dbToLinear(i4.interp_sample()); // Gain side/rear upmix
 gainLs = cos(angleS) * gainRear; // Gain left side/rear
 gainRs = sin(angleS) * gainRear; // Gain right side/rear
 
@@ -62,18 +90,11 @@ gainC *= gainFR;
 gainL *= gainFR;
 gainR *= gainFR;
 
-@sample
-
 in = (spl0 + spl1) / 2.0; // input sample value as mono
 
-// Is the slider between L/C or or C/R?
-// side gain needs to be smoothed differently
-// It clicked when shifting left to right fast because suddenly
-// other channel keeps large amount rather than travelling through 0
-
-spl0 = in * gsl.smooth(gainL);
-spl1 = in * gsr.smooth(gainR); // eliminate left channel if panner is on right side
-spl2 = in * gsc.smooth(gainC); // Centre gain
-spl3 = in * gslfe.smooth(gainLFE);
-spl4 = in * gsls.smooth(gainLs); // Rear left
-spl5 = in * gsrs.smooth(gainRs); // Rear right
+spl0 = in * gainL;
+spl1 = in * gainR; // eliminate left channel if panner is on right side
+spl2 = in * gainC; // Centre gain
+spl3 = in * gainLFE;
+spl4 = in * gainLs; // Rear left
+spl5 = in * gainRs; // Rear right
