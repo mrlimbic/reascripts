@@ -1,0 +1,52 @@
+desc:Square Pusher Distortion [mrlimbic]
+//tags: distortion
+//author: mrlimbic
+version: 1.0
+
+slider1:2<1.0,10.0.0,0.01>Power
+
+in_pin:left input
+in_pin:right input
+out_pin:left output
+out_pin:right output
+
+@init
+// Simple interoplator that smooths slider value across sample block
+// This should be replaced later with a sample accurate interpolator
+function interp_init(index) (
+  this.slider_index = index;
+  this.last_value = slider(this.slider_index);
+);
+
+function interp_slider() (
+  this.next_value = slider(this.slider_index);
+);
+
+function interp_block() global(samplesblock) (
+  this.delta = (this.next_value - this.last_value) / samplesblock;
+);
+
+function interp_sample() (
+  value = this.last_value;
+  this.last_value += this.delta;
+  value;
+);
+
+i1.interp_init(1);
+
+@slider
+i1.interp_slider();
+
+@block
+i1.interp_block();
+
+@sample
+in0 = spl0;
+in1 = spl1;
+
+power = i1.interp_sample();
+s0 = pow(abs(in0), 1.0/power); // power=2 for sqrt
+s1 = pow(abs(in1), 1.0/power);
+
+spl0 = in0 < 0 ? -s0 : s0;
+spl1 = in1 < 0 ? -s1 : s1;
