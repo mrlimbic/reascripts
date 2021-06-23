@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<index version="1" name="mrlimbic scripts" commit="cdfe4bddebb1dba83d9c85af76cc852d3c8b7a6c">
+<index version="1" name="mrlimbic scripts" commit="fcf499d4f378cf623f35b163e1b76ae3de73bce0">
   <category name="Envelopes">
     <reapack name="mrlimbic_apply vr rotate from item notes.lua" type="script" desc="mrlimbic_apply vr rotate from item notes">
       <metadata>
@@ -156,6 +156,12 @@ Initial release]]></changelog>
       <version name="1.1" author="John Baker (aka vordio aka mrlimbic)" time="2016-08-02T20:03:52Z">
         <changelog><![CDATA[+ Fixed bug where items sometimes moved to wrong track]]></changelog>
         <source main="true">https://github.com/mrlimbic/reascripts/raw/2a4192934058a05446f172f08fd71712eb28fb78/Regions/mrlimbic_create%20regions%20from%20item%20groups.lua</source>
+      </version>
+    </reapack>
+    <reapack name="mrlimbic_import timecoded regions from tab-delimited CSV.lua" type="script" desc="Import timecoded regions as tab-delimited CSV file">
+      <version name="1.0" author="mrlimbic" time="2021-06-23T19:01:08Z">
+        <changelog><![CDATA[+ Initial Release]]></changelog>
+        <source main="main">https://github.com/mrlimbic/reascripts/raw/fcf499d4f378cf623f35b163e1b76ae3de73bce0/Regions/mrlimbic_import%20timecoded%20regions%20from%20tab-delimited%20CSV.lua</source>
       </version>
     </reapack>
   </category>
